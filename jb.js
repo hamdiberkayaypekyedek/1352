@@ -539,7 +539,7 @@ let allDone = false,
     }
     nativeStatusProbe = async function () {
       // Optional calls: absence must not block or modify the jailbreak.
-      const wanted = [3, 4, 6, 54, 92, 97, 98, 105, 118, 209];
+      const wanted = [3, 4, 6, 97, 98, 105, 116, 118, 209];
       const absent = new Set(wanted.filter(n => !stubAddr.has(n)));
       for (let o = 0; o < off.k_scan_stage1 && absent.size; o += 16) {
         const v = p.read8(libkernelBase.add32(o));
@@ -547,6 +547,30 @@ let allDone = false,
         const n = ((v.low >>> 24) | ((v.hi & 0x00ffffff) << 8)) >>> 0;
         if (absent.has(n)) { stubAddr.set(n, libkernelBase.add32(o)); absent.delete(n); }
       }
+      // Read-only system clock writes into a retained JS buffer. No payload edits.
+      let memoryReport = 'v11: unavailable';
+      try {
+        if (stubAddr.has(116)) {
+          const testBuffer = new ArrayBuffer(32);
+          const testBytes = new Uint8Array(testBuffer);
+          const testView = new DataView(testBuffer);
+          testBytes.fill(0xa5);
+          keepAlive.push(testBuffer, testBytes, testView);
+          const testPointer = bufAddr(testBuffer);
+          const rc = sc(116, testPointer, 0).i32;
+          const seconds = testView.getUint32(0, true);
+          const upper = testView.getUint32(4, true);
+          const micros = testView.getUint32(8, true);
+          const microUpper = testView.getUint32(12, true);
+          const same = (p.read4(testPointer) >>> 0) === seconds;
+          const guard = testBytes.slice(16).every(v => v === 0xa5);
+          const valid = rc === 0 && upper === 0 && seconds > 946684800 && seconds < 4102444800 && microUpper === 0 && micros < 1000000 && same && guard;
+          memoryReport = 'v11: ' + (valid ? 'PASS' : 'FAIL') + ' rc=' + rc + ' same=' + same + ' guard=' + guard;
+          if (rc !== 0) memoryReport += ' errno=' + errno();
+        } else memoryReport = 'v11: missing clock stub';
+      } catch(e) { memoryReport = 'v11: error ' + String(e); }
+      try { localStorage.setItem('aypek-memory-result', memoryReport); } catch(_) {}
+      mark('MEMORY-CHECK', memoryReport);
       if (absent.size) { mark("NATIVE-STATUS", "missing-stubs:" + Array.from(absent).join(",")); return null; }
       return probeStatus({
         call: (n, ...args) => sc(n, ...args).i32,

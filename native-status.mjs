@@ -31,15 +31,11 @@ export async function probeStatus(env) {
     try {
       fd = call(97, 2, 1, 0); // AF_INET, SOCK_STREAM
       if (fd < 0) { last = 'socket:' + errno(); return null; }
-      if (call(92, fd, 4, 4) !== 0) {
-        const fcntlError = errno();
-        option.view.setInt32(0, 1, true);
-        // FIONBIO only changes this new socket to nonblocking mode.
-        if (call(54, fd, 0x8004667e, option.ptr) !== 0) {
-          last = 'nonblock-fcntl:' + fcntlError + ',ioctl:' + errno(); return null;
-        }
-      }
       option.view.setInt32(0, 1, true);
+      // Orbis SO_NBIO: do not connect unless nonblocking mode was accepted.
+      if (call(105, fd, 0xffff, 0x1200, option.ptr, 4) !== 0) {
+        last = 'so-nbio:' + errno(); return null;
+      }
       if (call(105, fd, 0xffff, 0x0800, option.ptr, 4) !== 0) { last = 'nosigpipe:' + errno(); return null; }
       const connected = call(98, fd, address.ptr, 16);
       if (connected !== 0) {

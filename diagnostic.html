@@ -26,7 +26,7 @@
  }
  function run(){
   button.disabled=true;out.textContent='';
-  log('Sayfa: '+location.href);log('Protokol: '+location.protocol);try{log('Paket: v9');log('Yerel kontrol: '+(localStorage.getItem('aypek-native-result')||'Henüz kayıt yok'));}catch(e){}
+  log('Sayfa: '+location.href);log('Protokol: '+location.protocol);try{log('Paket: v11');log('Bellek testi: '+(localStorage.getItem('aypek-memory-result')||'Henüz çalışmadı'));log('Yerel kontrol: '+(localStorage.getItem('aypek-native-result')||'Henüz kayıt yok'));}catch(e){}
   log('Tarayıcı: '+navigator.userAgent);
   try{log('Son ışık sonucu: '+(sessionStorage.getItem('aypek-result')||'Kayıt yok'));}catch(e){log('Önceki sonuç okunamıyor');}
   if(!/PlayStation\s+4[\/ ]/.test(navigator.userAgent)){log('\nBu testi PS4 tarayıcısında aç. Bilgisayarda 127.0.0.1 PS4 adresi değildir.');button.disabled=false;return;}

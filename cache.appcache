@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# aypek-native-status-v9-20261013
+# aypek-memory-v11-20261014
 
 CACHE:
 native-status.mjs
@@ -20,7 +20,7 @@ rpc_worker.js
 goldhen.bin
 patches/1352.bin
 core.js?v=10
-jb.js?v=23
+jb.js?v=25
 
 NETWORK:
 *

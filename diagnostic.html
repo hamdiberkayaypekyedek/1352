@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AYPEK bağlantı testi</title>
+<style>body{background:#071426;color:#eef4ff;font:20px Arial,sans-serif;margin:32px}h1{font-size:28px}button{font:inherit;padding:12px 20px;background:#204f88;color:white;border:1px solid #7798bb;border-radius:6px}pre{white-space:pre-wrap;overflow-wrap:break-word;background:#10223b;padding:20px;line-height:1.5}p{color:#bacbe0}</style></head>
+<body><h1>AYPEK · Bağlantı testi</h1><p>Yalnızca PayLoader durumunu sorgular. Jailbreak veya yük gönderimi yapmaz.</p><button id="run" type="button">Testi tekrar çalıştır</button><pre id="out" role="status" aria-live="polite"></pre>
+<script>
+(function(){
+ var out=document.getElementById('out'),button=document.getElementById('run');
+ function log(s){out.textContent+=s+'\n';}
+ function request(method,done){
+  var xhr=new XMLHttpRequest(),finished=false,start=Date.now();
+  log('\n'+method+' http://127.0.0.1:9090/status');
+  function finish(kind){
+   if(finished)return;finished=true;
+   log('Sonuç: '+kind+' | HTTP: '+xhr.status+' | Süre: '+(Date.now()-start)+' ms');
+   if(kind==='Yanıt alındı'){
+    log('Yanıt: '+(xhr.responseText||'(boş)').slice(0,600));
+    try{var data=JSON.parse(xhr.responseText);log('Durum okunabiliyor: '+(data.status||'(status alanı yok)'));}catch(e){log('JSON okunamadı: '+e.message);}
+   }else{log('Tarayıcı bu hatada CORS, karma içerik ve bağlantı hatasını kesin olarak ayıramaz.');}
+   done();
+  }
+  xhr.onload=function(){finish('Yanıt alındı');};
+  xhr.onerror=function(){finish('Bağlantı veya tarayıcı erişim engeli');};
+  xhr.ontimeout=function(){finish('Zaman aşımı');};
+  try{xhr.open(method,'http://127.0.0.1:9090/status',true);xhr.timeout=5000;xhr.send();}
+  catch(e){log('İstek başlatılamadı: '+e.name+' — '+e.message);done();}
+ }
+ function run(){
+  button.disabled=true;out.textContent='';
+  log('Sayfa: '+location.href);log('Protokol: '+location.protocol);try{log('Paket: v9');log('Yerel kontrol: '+(localStorage.getItem('aypek-native-result')||'Henüz kayıt yok'));}catch(e){}
+  log('Tarayıcı: '+navigator.userAgent);
+  try{log('Son ışık sonucu: '+(sessionStorage.getItem('aypek-result')||'Kayıt yok'));}catch(e){log('Önceki sonuç okunamıyor');}
+  if(!/PlayStation\s+4[\/ ]/.test(navigator.userAgent)){log('\nBu testi PS4 tarayıcısında aç. Bilgisayarda 127.0.0.1 PS4 adresi değildir.');button.disabled=false;return;}
+  request('GET',function(){request('POST',function(){log('\nTest tamamlandı. Bu ekranın fotoğrafını paylaş.');button.disabled=false;});});
+ }
+ button.onclick=run;run();
+})();
+</script></body></html>

@@ -1,0 +1,26 @@
+CACHE MANIFEST
+# aypek-native-status-v9-20261013
+
+CACHE:
+native-status.mjs
+controller-off.png
+controller.png
+light-status.js
+cache-gate.js
+index.html
+jb.html
+theme.css
+playstation.svg
+jb.js
+core.js
+mem.js
+int64.js
+ps4_offsets.js
+rpc_worker.js
+goldhen.bin
+patches/1352.bin
+core.js?v=10
+jb.js?v=23
+
+NETWORK:
+*
